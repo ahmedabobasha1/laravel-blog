@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-
+use App\Http\Controllers\StudentController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -16,32 +16,48 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('welcome');
 });
-Route::prefix('tracks')->group(function(){
+// Route::prefix('tracks')->group(function(){
 
-    Route::get('/',function(){
-        return "list of tracks pages";
-    })->name('tracks.index');
+//     Route::get('/',function(){
+//         return "list of tracks pages";
+//     })->name('tracks.index');
 
-    Route::get('/{id}/{name?}',function($id,$name=''){
+//     Route::get('/{id}/{name?}',function($id,$name=''){
 
-        return 'Details page of tracks '.$id.' named '.$name ;
+//         return 'Details page of tracks '.$id.' named '.$name ;
         
-    })->name('track.etails');
+//     })->name('track.etails');
 
-    Route::get('/create',function(){})->name('tracks.create');
+//     Route::get('/create',function(){})->name('tracks.create');
 
-    Route::Post("/",function(){})->name('tracks.store');
+//     Route::Post("/",function(){})->name('tracks.store');
 
-    Route::get('/{id}/edit',function($id){
+//     Route::get('/{id}/edit',function($id){
 
-        return 'this is edit form of tracks'. $id ;
+//         return 'this is edit form of tracks'. $id ;
 
-    })->name('tracks.edit');
+//     })->name('tracks.edit');
 
-    Route::put('/{id}',function($id){})->name('tracks.update');
+//     Route::put('/{id}',function($id){})->name('tracks.update');
 
-    Route::delete('/{id}',function($id){})->name('tracks.destroy');
-});
+//     Route::delete('/{id}',function($id){})->name('tracks.destroy');
+// });
+
+
+
+
+Route::resource('students', StudentController::class);
+
+
+
+
+
+
+
+
+
+
+
 
 Auth::routes();
 
