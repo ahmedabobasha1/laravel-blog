@@ -1,9 +1,25 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container">
-<a href="{{route('students.create')}}"class="btn btn-primary">create student</a>
+@if(session('message'))
+<div  class="alert alert-success text-center">
+    {{session('message')}}
+</div>
+@elseif(session('deleted'))
+<div  class="alert alert-danger text-center">
+    {{session('deleted')}}
+</div>
+@elseif(session('update'))
+<div  class="alert alert-success text-center">
+    {{session('update')}}
+</div>
+@endif
 
+
+<div class="container">
+    @can('create', App\Models\Student::class)
+<a href="{{route('students.create')}}"class="btn btn-primary">create student</a>
+    @endcan
     <table class="table">
         <thead>
             <tr>
@@ -11,6 +27,7 @@
                 <th>iDno</th>
                 <th>name</th>
                 <th>age</th>
+                <th>track</th>
                 <th>update</th>
                 <th>Delete</th>
             </tr>
@@ -22,11 +39,21 @@
                     <td>{{$student->iDno}}</td>
                     <td>{{$student->name}}</td>
                     <td>{{$student->age}}</td>
-                    <td><a href ="{{route('students.edit',$student)}}" class="btn btn-info">Edit</a></td>
+                    <!-- <td>{{\App\Models\Track::find($student->track_id)->name}}</td> -->
+                    <td>{{$student->track->name}}</td>
+                    <td>
+                    @can('update', $student)
+                        <a href ="{{route('students.edit',$student)}}" class="btn btn-info">Edit</a>
+                        @endcan
+                    </td>
                     <form action="{{route('students.destroy',$student->id)}}" method="POST">
                     @method('delete')
                      @csrf
-                    <td><button type="submit"  class="btn btn-danger">Delete</button></td>
+                    <td>
+                    @can('delete', $student)
+                        <button type="submit"  class="btn btn-danger">Delete</button>
+                    </td>
+                    @endcan
                     </form>
                    
                 </tr>

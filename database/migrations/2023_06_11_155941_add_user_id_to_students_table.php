@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class AddConstraintsTrackidToStudentTable extends Migration
+class AddUserIdToStudentsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -14,8 +14,10 @@ class AddConstraintsTrackidToStudentTable extends Migration
     public function up()
     {
         Schema::table('students', function (Blueprint $table) {
-            $table->unsignedBigInteger('track_id');
-            $table->foreign('track_id')->references('id')->on('tracks');
+            $table->unsignedBigInteger('user_id');
+
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+
         });
     }
 
@@ -27,8 +29,10 @@ class AddConstraintsTrackidToStudentTable extends Migration
     public function down()
     {
         Schema::table('students', function (Blueprint $table) {
-            $table->dropForeign(['track_id']);
-            $table->dropColumn('track_id');
+
+            $table->dropForeign(['user_id']);
+
+            $table->dropColumn('user_id');
         });
     }
 }

@@ -3,10 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\Student;
+use App\Models\Track;
 use GrahamCampbell\ResultType\Success;
 use Illuminate\Http\Request;
-use PHPUnit\Framework\MockObject\Builder\Stub;
+use Illuminate\Validation\Rule;
 
+use PHPUnit\Framework\MockObject\Builder\Stub;
 class StudentController extends Controller
 {
     /**
@@ -29,7 +31,12 @@ class StudentController extends Controller
      */
     public function create()
     {
-        return view('student.create');
+
+        $this->authorize('create',Student::class);
+
+       $tracks = Track::all();
+       
+        return view('student.create',compact('tracks'));
     }
 
     /**
@@ -40,16 +47,31 @@ class StudentController extends Controller
      */
     public function store(Request $request)
     {
+
+
+
          // dd($request);
-       // $data = $request->all();
-       // dd($data);
-        Student::create([
-            'name'=>$request->stu_name,
-            'iDno'=>$request->std_iDno,
-            'age'=>$request->stu_age,
-            'track_id'=>$request->track
+       $data = $request->all();
+     //  dd($data);
+        // validation 
+
+         $request->validate([
+            'name'=>['required','string','min:3',Rule::unique('students')->whereNull('deleted_at')],
+           'iDno'=>['required','alpha_num:ascii'],
+            'stu_age'=>'required|Numeric',
+            'tracks_dropdown'=>'required'
         ]);
-        return redirect()->route('students.index');
+        
+  
+
+        Student::create([ 
+            'name'=>$request->name,
+            'iDno'=>$request->iDno,
+            'age'=>$request->stu_age,
+           'track_id'=>$request->tracks_dropdown,
+            'user_id'=>$request->user()->id
+        ]);
+        return redirect()->route('students.index')->with('message','save success');
       // Student::create($request)
     }
 
@@ -72,8 +94,14 @@ class StudentController extends Controller
      */
     public function edit($id)
     {
+        
         $student = Student::find($id);
-        return view('student.edit',compact('student'));
+        $this->authorize('update', $student);
+        $track = Track::find($student->track_id);
+   
+        $tracks = Track::all();
+
+        return view('student.edit',compact('student','track','tracks'));
     }
 
     /**
@@ -85,16 +113,29 @@ class StudentController extends Controller
      */
     public function update(Request $request, $id)
     {
-        
         $stu_data = Student::find($id);
-       // dd($stu_data);
+        if($request->user()->cannot('update',$stu_data)){
+            abort(403);
+        }
+        
+        $request->validate([
+            'name'=>['required','string','min:3',Rule::unique('students')->ignore($stu_data->id, 'id'),
+        ],
+            'iDno'=>['required','alpha_num:ascii',Rule::unique('students')->ignore($stu_data->id, 'id')],
+            'stu_age'=>'required|Numeric',
+            'tracks_dropdown'=>'required'
+        ]);
+  
+        
+       //dd($stu_data);
        
-       $stu_data->name = $request->stu_name;
-       $stu_data->iDno = $request->std_iDno;
+       $stu_data->name = $request->name;
+       $stu_data->iDno = $request->iDno;
        $stu_data->age = $request->stu_age;
-       $stu_data->track_id = $request->track;
+       $stu_data->track_id = $request->tracks_dropdown;
+       
         $stu_data->save();
-    return redirect()->route('students.index');
+    return redirect()->route('students.index')->with('update','updated success');
     }
 
     /**
@@ -105,9 +146,10 @@ class StudentController extends Controller
      */
     public function destroy($id)
     {
+        $this->authorize('delete', Student::find($id));
         // return 'hello';
        //dd( Student::find($id));
        Student::find($id)->delete();
-        return redirect()->route('students.index');
+        return redirect()->route('students.index')->with('deleted','deleted success');
     }
 }
